@@ -1,0 +1,2633 @@
+/* Shared components: buttons, tiles, chips, media cards, stats, marquee, glow, header, footer, mockups, showpieces. */
+
+/* Button */
+
+.btn {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  height: var(--btn-h);
+  padding-inline: var(--btn-px);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0;
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+}
+
+/* Hover fill: a deeper green circle that spreads from the right end of the button over all of it. On a button with
+   an arrow the circle is already there, round the arrow, 6px in from the end; on one without, it starts from a point
+   at the same place. */
+.btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-accent-hover);
+  clip-path: circle(0px at calc(100% - var(--btn-h) / 2) 50%);
+  transition: clip-path var(--dur-hover) var(--ease-inout);
+}
+
+.btn svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.btn--primary {
+  background: var(--color-accent);
+  color: var(--white);
+}
+
+.btn--primary:has(svg),
+.btn--mail:has(svg) {
+  --inset: 6px;
+  --knob: calc(var(--btn-h) - var(--inset) * 2);
+  gap: var(--sp-4);
+  padding-right: var(--inset);
+}
+
+.btn--primary:has(svg)::before,
+.btn--mail:has(svg)::before {
+  clip-path: circle(calc(var(--knob) / 2) at calc(100% - var(--btn-h) / 2) 50%);
+}
+
+.btn--primary svg,
+.btn--mail svg {
+  width: var(--knob, 18px);
+  height: var(--knob, 18px);
+  padding: calc((var(--knob, 18px) - 18px) / 2);
+  color: var(--white);
+  overflow: hidden;
+}
+
+.btn--primary svg path,
+.btn--mail svg path {
+  transform-box: fill-box;
+}
+
+/* Email: the same button in navy; the round piece is a lighter navy and holds an envelope. On the navy bands it is
+   white with navy words. */
+.btn--mail {
+  background: var(--ink-900);
+  color: var(--white);
+}
+
+.btn--mail::before {
+  background: var(--ink-700);
+}
+
+.btn--mail svg {
+  color: var(--white);
+}
+
+/* on the photo copy of the hero's words and on the dark header, the navy button turns white */
+.hero__layer--light .btn--mail,
+body.is-dark .header.is-scrolled .btn--mail {
+  background: var(--white);
+  color: var(--ink-900);
+}
+
+.hero__layer--light .btn--mail::before,
+body.is-dark .header.is-scrolled .btn--mail::before {
+  background: var(--ink-100);
+}
+
+.hero__layer--light .btn--mail svg {
+  color: var(--ink-900);
+}
+
+.section--ink .btn--mail {
+  background: var(--white);
+  color: var(--ink-900);
+}
+
+.section--ink .btn--mail::before {
+  background: var(--ink-100);
+}
+
+.section--ink .btn--mail svg {
+  color: var(--ink-900);
+}
+
+/* Two buttons side by side, email first; one above the other on phones */
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+
+.section__head .btn-row {
+  margin-top: var(--gap-lead-btn);
+}
+
+.btn-row .btn {
+  margin: 0;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:active::before {
+  clip-path: circle(150% at calc(100% - var(--btn-h) / 2) 50%);
+}
+
+@media (hover: hover) {
+  .btn:hover::before { clip-path: circle(150% at calc(100% - var(--btn-h) / 2) 50%); }
+  .btn:hover svg path { animation: arrow-loop var(--dur-hover) var(--ease-inout); }
+}
+
+/* The arrow leaves to the right and comes back in from the left */
+@keyframes arrow-loop {
+  45%  { transform: translateX(150%); opacity: 0; }
+  55%  { transform: translateX(-150%); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .btn {
+    width: 100%;
+    max-width: 360px;
+  }
+  /* Full width: the words on the left, the round piece at the right end */
+  .btn--primary:has(svg),
+  .btn--mail:has(svg) {
+    justify-content: space-between;
+  }
+  .btn-row {
+    flex-direction: column;
+    width: 100%;
+  }
+}
+
+/* Contact button (contact page): a wide rounded button, email in navy with an envelope. On hover white fills it from
+   the left and a navy ring keeps the edge; the words and icon turn navy as the white passes under them. */
+.contact-actions {
+  display: flex;
+  gap: var(--sp-3);
+  margin-top: var(--sp-7);
+}
+
+.contact-btn {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  width: 240px;
+  height: 64px;
+  border-radius: var(--r-md);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-bold);
+  white-space: nowrap;
+  transition: color calc(var(--dur-hover) * 0.6) var(--ease-out) calc(var(--dur-hover) * 0.25), transform var(--dur-fast) var(--ease-out);
+}
+
+.contact-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--white);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--dur-hover) var(--ease-inout);
+}
+
+.contact-btn::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 2px var(--ring);
+  opacity: 0;
+  transition: opacity var(--dur-hover) var(--ease-inout);
+  pointer-events: none;
+}
+
+.contact-btn svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+}
+
+.contact-btn--mail {
+  --ring: var(--ink-900);
+  background: var(--ink-900);
+  color: var(--white);
+}
+
+
+.contact-btn:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) {
+  .contact-btn:hover::before { transform: scaleX(1); }
+  .contact-btn:hover::after { opacity: 1; }
+  .contact-btn--mail:hover { color: var(--ink-900); }
+}
+
+@media (max-width: 768px) {
+  .contact-btn {
+    flex: 1 1 0;
+    width: auto;
+    height: 56px;
+  }
+}
+
+/* Text link that leads to another page */
+
+/* The underline covers the text only, so it stops short of the arrow (18px + gap) */
+.link-arrow {
+  --arrow-space: calc(18px + var(--sp-1));
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-700);
+  background: linear-gradient(currentColor, currentColor) no-repeat right var(--arrow-space) bottom 0 / 0 1px;
+  transition: color var(--dur-fast) var(--ease-out), background-size var(--dur-hover) var(--ease-inout);
+}
+
+.link-arrow svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+@media (hover: hover) {
+  .link-arrow:hover {
+    color: var(--ink-900);
+    background-position: left 0 bottom 0;
+    background-size: calc(100% - var(--arrow-space)) 1px;
+  }
+  .link-arrow:hover svg { animation: arrow-loop var(--dur-hover) var(--ease-inout); }
+}
+
+/* Soft tile: raised rounded surface that carries one visual per section */
+
+.tile {
+  position: relative;
+  background: var(--tile-bg);
+  border-radius: var(--r-xl);
+  padding: var(--tile-pad);
+  overflow: hidden;
+}
+
+/* Raised only on a grey section of the same colour; on white it stays a flat grey panel */
+.section--soft .tile {
+  box-shadow: var(--shadow-tile), inset 1px 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Chip: small white information card placed over a tile or a photo */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4) var(--sp-3) var(--sp-3);
+  background: var(--white);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-card);
+  color: var(--ink-900);
+  white-space: nowrap;
+}
+
+.chip__icon {
+  width: 36px;
+  height: 36px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chip__icon svg {
+  width: 18px;
+  height: 18px;
+  color: var(--white);
+}
+
+.chip .t-small,
+.on-dark .chip .t-small {
+  display: block;
+  line-height: 1.3;
+  color: var(--ink-500);
+}
+
+.chip .t-h3,
+.on-dark .chip .t-h3 {
+  display: block;
+  font-size: var(--fs-lead);
+  line-height: 1.3;
+  color: var(--ink-900);
+}
+
+.chip--floating {
+  position: absolute;
+  left: var(--sp-7);
+  bottom: var(--sp-7);
+}
+
+@media (max-width: 768px) {
+  .chip--floating {
+    left: var(--sp-4);
+    bottom: var(--sp-4);
+  }
+}
+
+/* In the middle of its photo (centred with margins, so the pop-in transform stays free) */
+.chip--floating.chip--center {
+  inset: 0;
+  width: max-content;
+  height: max-content;
+  margin: auto;
+}
+
+/* Glow: one broad, faint green bloom low in the middle of the dark band, fading out well before the edges */
+
+.glow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glow::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -55%;
+  width: 150%;
+  height: 120%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(4, 123, 74, 0.42), rgba(4, 123, 74, 0.14) 45%, rgba(4, 123, 74, 0) 100%);
+  transform: translateX(-50%);
+}
+
+.glow ~ * {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .glow::before {
+    width: 220%;
+    height: 90%;
+    bottom: -40%;
+  }
+}
+
+/* Media card */
+
+.media {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-soft);
+  isolation: isolate;
+}
+
+.media--md { border-radius: var(--r-md); aspect-ratio: 4 / 5; }
+/* where a cropped photo keeps its subject: lower part or top */
+.media--low img { object-position: 50% 75%; }
+.media--high img { object-position: 50% 0; }
+.media--xl { border-radius: var(--r-xl); aspect-ratio: 16 / 9; }
+
+.media img,
+.media video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Hover zooms the photo inside a still frame. The individual scale property keeps it apart from scripted transforms. */
+@media (hover: hover) {
+  .media img {
+    transition: scale 1s var(--ease-out);
+  }
+  .media:hover img {
+    scale: 1.05;
+  }
+}
+
+/* Large section photos drift inside their frame while scrolling (main.js); a layer of their own avoids repainting */
+.section .media--xl img {
+  will-change: transform;
+}
+
+@media (max-width: 768px) {
+  .media--xl { aspect-ratio: 4 / 5; }
+}
+
+/* Stat block */
+
+.stat {
+  text-align: left;
+}
+
+.stat .t-num { display: block; }
+
+/* Marquee */
+
+.marquee {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* The trailing padding equals the gap, so half the track is exactly one run of items plus their gaps
+   and the loop has no jump. --marquee-repeat is set by the script. */
+.marquee__track {
+  display: flex;
+  gap: var(--gap-card);
+  width: max-content;
+  padding-right: var(--gap-card);
+  animation: marquee calc(var(--marquee-dur) * var(--marquee-repeat, 1)) linear infinite;
+}
+
+.marquee--reverse .marquee__track {
+  animation-direction: reverse;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track { animation: none; }
+}
+
+/* Header */
+
+.header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  height: var(--header-h);
+  transition: background-color var(--dur-bg) var(--ease-inout);
+}
+
+/* Bottom line grows from the centre to both sides once the page scrolls */
+.header::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--ink-200);
+  transform: scaleX(0);
+  transition: transform var(--dur-line) var(--ease-text), background-color 0.4s var(--ease-out);
+}
+
+.header.is-scrolled {
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+}
+
+.header.is-scrolled::after {
+  transform: scaleX(1);
+}
+
+/* On a dark background the header takes that background's colour: near black by default, navy on a navy step (.is-ink) */
+body.is-dark .header.is-scrolled {
+  background: rgba(5, 7, 6, 0.72);
+}
+
+body.is-dark.is-ink .header.is-scrolled {
+  background: rgba(17, 25, 39, 0.72);
+}
+
+body.is-dark .header::after {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.is-dark .header.is-scrolled .logo-mark path,
+body.is-dark .header.is-scrolled .logo-word path {
+  fill: var(--white);
+}
+
+body.is-dark .header.is-scrolled .header__nav a {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+@media (hover: hover) {
+  body.is-dark .header.is-scrolled .header__nav a:hover { color: var(--white); }
+}
+
+body.is-dark .header.is-scrolled .header__toggle span,
+body.is-dark .header.is-scrolled .header__toggle span::before,
+body.is-dark .header.is-scrolled .header__toggle span::after {
+  background: var(--white);
+}
+
+.header__inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-6);
+}
+
+.header__logo {
+  display: flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Logo: the symbol and the word are separate inline SVGs so the symbol can be drawn (DESIGN.md 5-6) */
+.header__logo svg {
+  display: block;
+  height: 28px;
+  width: auto;
+  overflow: visible;
+}
+
+.logo-mark path {
+  fill: var(--green-700);
+  stroke: var(--green-700);
+  stroke-width: 18;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  stroke-opacity: 0;
+  transition: fill 0.4s var(--ease-out);
+}
+
+.logo-word path {
+  fill: var(--ink-900);
+  transform-box: fill-box;
+  transition: fill 0.4s var(--ease-out);
+}
+
+/* The outline is traced, then filled while the line fades; the letters rise in one by one after it */
+.js .logo-mark path {
+  animation: logo-draw var(--dur-draw) var(--ease-inout) 0.2s backwards;
+}
+
+.js .logo-word path {
+  animation: logo-letter 0.6s var(--ease-out) var(--logo-word-at) backwards;
+}
+
+.js .logo-word path:nth-child(2)  { animation-delay: calc(var(--logo-word-at) + 0.04s); }
+.js .logo-word path:nth-child(3)  { animation-delay: calc(var(--logo-word-at) + 0.08s); }
+.js .logo-word path:nth-child(4)  { animation-delay: calc(var(--logo-word-at) + 0.12s); }
+.js .logo-word path:nth-child(5)  { animation-delay: calc(var(--logo-word-at) + 0.16s); }
+.js .logo-word path:nth-child(6)  { animation-delay: calc(var(--logo-word-at) + 0.2s); }
+.js .logo-word path:nth-child(7)  { animation-delay: calc(var(--logo-word-at) + 0.24s); }
+.js .logo-word path:nth-child(8)  { animation-delay: calc(var(--logo-word-at) + 0.28s); }
+.js .logo-word path:nth-child(9)  { animation-delay: calc(var(--logo-word-at) + 0.32s); }
+.js .logo-word path:nth-child(10) { animation-delay: calc(var(--logo-word-at) + 0.36s); }
+.js .logo-word path:nth-child(11) { animation-delay: calc(var(--logo-word-at) + 0.4s); }
+.js .logo-word path:nth-child(12) { animation-delay: calc(var(--logo-word-at) + 0.44s); }
+
+@keyframes logo-draw {
+  0%   { stroke-dashoffset: 1; stroke-opacity: 1; fill-opacity: 0; }
+  65%  { stroke-dashoffset: 0; stroke-opacity: 1; fill-opacity: 0; }
+  100% { stroke-dashoffset: 0; stroke-opacity: 0; fill-opacity: 1; }
+}
+
+@keyframes logo-letter {
+  from { opacity: 0; transform: translateY(40%); }
+}
+
+/* held at their first frame until the page has set itself up (main.js adds .is-ready on the first painted frame) */
+.js:not(.is-ready) .logo-mark path,
+.js:not(.is-ready) .logo-word path {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .js .logo-mark path,
+  .js .logo-word path { animation: none; }
+}
+
+.header__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-6);
+}
+
+.header__nav a {
+  position: relative;
+  padding-block: var(--sp-2);
+  font-size: var(--fs-body);
+  font-weight: var(--fw-semibold);
+  color: var(--ink-700);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+/* One mark under each item, centred 2px below the link and always 3px thick: a line that grows from the centre on hover,
+   and on the current page the same line shrunk to a green dot. Only its width changes, so the thickness never shifts.
+   Arriving on a page plays line → dot once; hovering the current item stretches the dot back into the line. */
+.header__nav a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 2px);
+  width: 0;
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: currentColor;
+  transform: translate(-50%, -50%);
+  transition: width var(--dur-hover) var(--ease-inout), background-color var(--dur-hover) var(--ease-inout);
+}
+
+.header__nav a.is-active {
+  color: var(--ink-900);
+}
+
+.header__nav a.is-active::after {
+  width: 3px;
+  background: var(--color-accent);
+  animation: nav-settle 0.7s var(--ease-inout) 0.3s backwards;
+}
+
+body.is-dark .header.is-scrolled .header__nav a.is-active::after {
+  background: var(--green-400);
+}
+
+@keyframes nav-settle {
+  from {
+    width: 100%;
+    background: var(--ink-900);
+  }
+}
+
+@media (hover: hover) {
+  .header__nav a:hover { color: var(--ink-900); }
+  .header__nav a:hover::after {
+    width: 100%;
+    background: currentColor;
+  }
+}
+
+.header__cta {
+  height: 44px;
+  padding-inline: var(--sp-5);
+}
+
+.header__toggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  margin-right: -10px;
+  align-items: center;
+  justify-content: center;
+}
+
+.header__toggle span {
+  position: relative;
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--ink-900);
+  border-radius: 2px;
+  transition: transform var(--dur-hover) var(--ease-inout), background-color var(--dur-fast);
+}
+
+.header__toggle span::before,
+.header__toggle span::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: inherit;
+  border-radius: inherit;
+  transition: transform var(--dur-hover) var(--ease-inout);
+}
+
+.header__toggle span::before { transform: translateY(-7px); }
+.header__toggle span::after  { transform: translateY(7px); }
+
+.header.is-open .header__toggle span { background: transparent; }
+.header.is-open .header__toggle span::before { background: var(--ink-900); transform: rotate(45deg); }
+.header.is-open .header__toggle span::after  { background: var(--ink-900); transform: rotate(-45deg); }
+
+.menu {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  /* the whole logo on phones too, a little smaller: the symbol is drawn and the letters rise in as on a desktop */
+  .header__logo svg { height: 24px; }
+  .header__nav,
+  .header__cta { display: none; }
+  .header__toggle { display: inline-flex; }
+
+  .menu {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    /* everything centred across, and set high, near the menu button the thumb has just pressed */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: calc(var(--header-h) + 6svh) var(--gutter) var(--sp-7);
+    text-align: center;
+    background: var(--white);
+    clip-path: inset(0 0 100% 0);
+    visibility: hidden;
+    transition: clip-path 0.4s var(--ease-inout), visibility 0s 0.4s;
+  }
+
+  .menu.is-open {
+    clip-path: inset(0);
+    visibility: visible;
+    transition: clip-path 0.6s var(--ease-inout), visibility 0s;
+  }
+
+  /* Items sharpen in one after another while the panel unrolls */
+  .menu__list a,
+  .menu .btn,
+  .menu__mail {
+    opacity: 0;
+    transform: translateY(var(--reveal-y));
+    filter: blur(var(--reveal-blur));
+    transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out), filter 0.3s var(--ease-out);
+  }
+
+  .menu.is-open .menu__list a,
+  .menu.is-open .btn,
+  .menu.is-open .menu__mail {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+    transition: opacity var(--dur-reveal) var(--ease-text), transform var(--dur-reveal) var(--ease-text), filter var(--dur-reveal) var(--ease-text);
+  }
+
+  .menu.is-open .menu__list a:nth-child(1) { transition-delay: 0.2s; }
+  .menu.is-open .menu__list a:nth-child(2) { transition-delay: 0.26s; }
+  .menu.is-open .menu__list a:nth-child(3) { transition-delay: 0.32s; }
+  .menu.is-open .menu__list a:nth-child(4) { transition-delay: 0.38s; }
+  .menu.is-open .menu__list a:nth-child(5) { transition-delay: 0.44s; }
+  .menu.is-open .btn { transition-delay: 0.5s; }
+  .menu.is-open .menu__mail { transition-delay: 0.56s; }
+
+  .menu__mail {
+    margin-top: var(--sp-4);
+    padding-block: var(--sp-3);
+    font-size: var(--fs-small);
+    color: var(--ink-500);
+  }
+
+  .menu__list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-5);
+  }
+
+  .menu__list a {
+    font-size: var(--fs-h2);
+    line-height: var(--lh-h2);
+    letter-spacing: var(--ls-h2);
+    font-weight: var(--fw-bold);
+    color: var(--ink-900);
+  }
+
+  .menu__list a.is-active { color: var(--color-accent); }
+
+  .menu .btn {
+    width: min(100%, 320px);
+    justify-content: center;
+    margin-top: var(--sp-7);
+  }
+
+  body.is-locked {
+    overflow: hidden;
+  }
+}
+
+/* Footer */
+
+.footer {
+  background: var(--bg-soft);
+  padding-block: var(--sp-9) var(--sp-7);
+}
+
+.footer__inner {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  gap: var(--sp-8);
+}
+
+.footer__brand img {
+  height: 24px;
+  width: auto;
+}
+
+.footer__brand .t-small {
+  margin-top: var(--sp-5);
+}
+
+.footer__brand .t-small + .t-small {
+  margin-top: var(--sp-2);
+}
+
+.footer__col .t-label {
+  color: var(--ink-900);
+  margin-bottom: var(--sp-4);
+}
+
+.footer__col ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.footer__col a {
+  font-size: var(--fs-small);
+  color: var(--ink-500);
+}
+
+@media (hover: hover) {
+  .footer__col a:hover { color: var(--ink-900); }
+}
+
+.footer__bottom .t-small:not(.footer__legal) {
+  color: var(--ink-300);
+}
+
+.footer__bottom {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-5);
+  margin-top: var(--sp-8);
+  padding-top: var(--sp-5);
+  border-top: 1px solid var(--ink-200);
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding-block: var(--sp-8) var(--sp-6);
+  }
+  .footer__inner {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--sp-6) var(--sp-5);
+  }
+  .footer__brand {
+    grid-column: 1 / -1;
+  }
+  .footer__col ul {
+    gap: 0;
+  }
+  .footer__col a {
+    display: block;
+    padding-block: var(--sp-3);
+  }
+  .footer__bottom {
+    flex-direction: column;
+    gap: var(--sp-2);
+    margin-top: var(--sp-6);
+  }
+}
+
+/* Card mockup used by the terminal showpiece */
+
+.mock-card {
+  width: 320px;
+  aspect-ratio: 1.586;
+  border-radius: var(--r-md);
+  padding: var(--sp-5);
+  background: var(--grad-accent);
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-float);
+}
+
+.mock-card__chip {
+  width: 36px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.mock-card__num {
+  font-size: var(--fs-small);
+  font-weight: var(--fw-semibold);
+  letter-spacing: 0.08em;
+}
+
+.mock-card__name {
+  font-size: var(--fs-small);
+  font-weight: var(--fw-semibold);
+  opacity: 0.85;
+}
+
+@media (max-width: 768px) {
+  .mock-card { width: 260px; }
+}
+
+/* Pencil ring (home notebook): a big green coloured-pencil loop round the whole page of a card, drawn by the script */
+.step-visual {
+  position: relative;
+}
+
+.pencil {
+  position: absolute;
+  left: 8%;
+  top: 9%;
+  width: 84%;
+  height: 82%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.pencil__line {
+  fill: none;
+  stroke: var(--green-600);
+  stroke-width: 2.2px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-opacity: 0.9;
+}
+
+.pencil__line--thin {
+  stroke-width: 1.2px;
+  stroke-opacity: 0.7;
+}
+
+/* Showpieces: working scenes placed inside a tile */
+
+.sp {
+  position: relative;
+  width: 100%;
+  min-height: var(--showpiece-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sp .chip {
+  position: absolute;
+}
+
+/* Terminal: card taps, waves, approval */
+
+.term {
+  position: relative;
+  width: 232px;
+  padding: var(--sp-4) var(--sp-4) var(--sp-5);
+  border-radius: 30px;
+  background: var(--ink-900);
+  box-shadow: var(--shadow-float);
+}
+
+.term__screen {
+  position: relative;
+  aspect-ratio: 1 / 1.1;
+  border-radius: 18px;
+  background: var(--white);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+}
+
+.term__amount {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--ls-h3);
+  font-weight: var(--fw-bold);
+  color: var(--ink-900);
+  font-variant-numeric: tabular-nums;
+}
+
+.term__status {
+  font-size: var(--fs-small);
+  line-height: var(--lh-small);
+  color: var(--ink-500);
+}
+
+.term__ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--green-400);
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0;
+}
+
+.term__idle,
+.term__done {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+}
+
+.term__done {
+  opacity: 0;
+}
+
+.term__check {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.term__check svg {
+  width: 28px;
+  height: 28px;
+  color: var(--white);
+}
+
+.term__keys {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+}
+
+.term__keys span {
+  height: 12px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.term__keys span:last-child {
+  background: var(--green-500);
+}
+
+.sp-terminal .mock-card {
+  position: absolute;
+  width: 190px;
+  right: 8%;
+  bottom: 10%;
+  transform: translate(140px, 120px) rotate(-10deg);
+  opacity: 0;
+}
+
+.sp-terminal-real {
+  height: var(--showpiece-h);
+  container-type: size;
+}
+
+.terminal-scene {
+  position: relative;
+  width: min(100cqw, 82cqh, 340px);
+  aspect-ratio: 0.86;
+}
+
+.term.term--photo {
+  position: absolute;
+  top: 6%;
+  left: 7%;
+  width: 72%;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.term__photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(var(--shadow-button)) drop-shadow(var(--shadow-float));
+}
+
+.term--photo .term__screen {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 70%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 0;
+  background: none;
+  transform-origin: 0 0;
+}
+
+.term--photo .term__amount {
+  font-size: clamp(14px, 5.5cqw, 23px);
+}
+
+.term--photo .term__status {
+  font-size: clamp(8px, 2.6cqw, 11px);
+}
+
+.term--photo .term__check {
+  width: 36%;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+.term--photo .term__check svg {
+  width: 60%;
+  height: 60%;
+}
+
+.sp-terminal-real .mock-card.mock-card--photo {
+  position: absolute;
+  left: 42%;
+  top: 53%;
+  right: auto;
+  bottom: auto;
+  width: 49%;
+  height: auto;
+  aspect-ratio: auto;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  filter: drop-shadow(var(--shadow-card));
+  opacity: 1;
+  transform: rotate(-8deg);
+  transform-origin: 20% 40%;
+}
+
+/* Wallet: balance moves to a bank account. Both cards are centred, and a thin line runs straight down the middle
+   between them; the amount rides down that line and the line fills behind it. */
+
+.wallet {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.wallet__gap {
+  position: relative;
+  height: var(--sp-9);
+}
+
+.wallet__card {
+  position: relative;
+  background: var(--white);
+  border-radius: var(--r-lg);
+  padding: var(--sp-5);
+  text-align: center;
+}
+
+.wallet__card .t-small { display: block; }
+.wallet__card .t-h3 { display: block; margin-top: var(--sp-1); font-variant-numeric: tabular-nums; }
+
+.wallet__row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+}
+
+.wallet__row .wallet__text {
+  min-width: 0;
+}
+
+.wallet__row .wallet__text .t-small {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* the line under the account turns green while it says the transfer is done */
+.wallet__row .wallet__text .t-small.is-done {
+  color: var(--color-accent);
+  font-weight: var(--fw-semibold);
+}
+
+.wallet__bankicon {
+  width: 44px;
+  height: 44px;
+  flex: none;
+  border-radius: var(--r-sm);
+  background: var(--ink-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wallet__bankicon svg {
+  width: 22px;
+  height: 22px;
+  color: var(--ink-700);
+}
+
+.wallet__done {
+  position: absolute;
+  top: var(--sp-4);
+  right: var(--sp-4);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.wallet__done svg {
+  width: 14px;
+  height: 14px;
+  color: var(--white);
+}
+
+.wallet__track {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  margin-left: -0.5px;
+  background: var(--ink-200);
+}
+
+.wallet__trackfill {
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent);
+  transform-origin: center top;
+  transform: scaleY(0);
+}
+
+/* drawn over the cards (it travels between them and must never pass under the bank card) */
+.wallet__pill {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--color-accent);
+  color: var(--white);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+  box-shadow: var(--shadow-card);
+  opacity: 0;
+}
+
+/* Chart: a dashboard window draws its daily sales line */
+
+.win {
+  width: 100%;
+  max-width: 480px;
+  background: var(--white);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.win__bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 40px;
+  padding: 0 var(--sp-4);
+  border-bottom: 1px solid var(--ink-100);
+}
+
+.win__bar span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--ink-100);
+}
+
+.win__bar em {
+  margin-left: var(--sp-2);
+  font-style: normal;
+  font-size: var(--fs-small);
+  color: var(--ink-300);
+}
+
+.win__body {
+  padding: var(--sp-5) var(--sp-5) var(--sp-4);
+}
+
+.win__kpi {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-4);
+}
+
+.win__kpi .t-small { display: block; }
+.win__kpi .t-h3 { display: block; margin-top: var(--sp-1); font-variant-numeric: tabular-nums; }
+
+.win__delta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--green-100);
+  color: var(--color-accent);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+
+.win__chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: var(--sp-4);
+  overflow: visible;
+}
+
+.win__chart .area { fill: url(#spChartFill); }
+.win__chart .line { fill: none; stroke: var(--color-accent); stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+.win__chart .grid { stroke: var(--ink-100); stroke-width: 1; }
+.win__chart .dot { fill: var(--color-accent); }
+.win__chart .halo { fill: var(--green-200); }
+
+/* Day labels sit under the chart; seven columns centred on the chart's data points (5% to 95%) */
+.win__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin: var(--sp-2) -2.5% 0;
+  text-align: center;
+  font-size: var(--fs-small);
+  line-height: var(--lh-small);
+  color: var(--ink-300);
+}
+
+/* Flow: online payment travels shop → Treepayments → card company → approved. A thin line runs straight through
+   the middle of the four nodes and fills red behind the travelling dot; the pay button clicks down and comes back
+   up green as "결제 완료". */
+
+.flow {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-7);
+}
+
+.flow__pay {
+  align-self: center;
+  width: 240px;
+  background: var(--white);
+  border-radius: var(--r-md);
+  padding: var(--sp-4);
+}
+
+.flow__pay .t-small { display: block; }
+.flow__pay .t-h3 { display: block; margin-top: var(--sp-1); font-variant-numeric: tabular-nums; }
+
+.flow__btn {
+  position: relative;
+  margin-top: var(--sp-3);
+  height: 40px;
+  border-radius: var(--r-sm);
+  background: var(--ink-900);
+  color: var(--white);
+  font-size: var(--fs-small);
+  font-weight: var(--fw-semibold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transform-origin: center;
+  transition: background-color 0.25s var(--ease-out);
+}
+
+.flow__btn-text,
+.flow__btn-done {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flow__btn-done {
+  transform: translateY(100%);
+}
+
+.flow__btn.is-done {
+  background: var(--color-accent);
+}
+
+.flow__steps {
+  position: relative;
+}
+
+.flow__track {
+  position: absolute;
+  left: 36px;
+  right: 36px;
+  top: 24px;
+  height: 1px;
+  background: var(--ink-200);
+}
+
+.flow__fill {
+  position: absolute;
+  inset: 0;
+  background: #E5484D;
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+
+.flow__dot {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #E5484D;
+  box-shadow: 0 0 0 5px rgba(229, 72, 77, 0.16);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+}
+
+.flow__nodes {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+}
+
+.flow__node {
+  width: 72px;
+  text-align: center;
+}
+
+.flow__node i {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--sp-2);
+  border-radius: 14px;
+  background: var(--white);
+  box-shadow: var(--shadow-card);
+  color: var(--ink-500);
+  transition: background-color 0.3s var(--ease-out), color 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+}
+
+.flow__node i svg {
+  width: 22px;
+  height: 22px;
+}
+
+.flow__node .flow__mark svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+.flow__node .t-small {
+  display: block;
+  color: var(--ink-500);
+  transition: color 0.3s var(--ease-out);
+}
+
+.flow__node.is-on i {
+  background: #E5484D;
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+.flow__node:last-child.is-on i {
+  background: var(--color-accent);
+}
+
+.flow__node.is-on .t-small {
+  color: var(--ink-900);
+}
+
+/* Map: the Korean peninsula (north and south) in dots, with approval chips whose tails point at a place */
+
+.map {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  aspect-ratio: 0.96;
+  margin-inline: auto;
+}
+
+.map canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.map__pin {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+/* the chips' own layer over the section (main.js keeps each one over its spot on the map) */
+.map__tags {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.map__tag {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+}
+
+/* The spot on the land, with a soft ring that keeps pulsing while the chip is up */
+.map__pin::before,
+.map__pin::after {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: -5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity 0.4s var(--ease-out), transform 0.5s var(--ease-out);
+}
+
+.map__pin::before {
+  background: var(--green-400);
+}
+
+.map__pin::after {
+  border: 2px solid var(--green-400);
+}
+
+.map__pin.is-on::before {
+  opacity: 1;
+  transform: none;
+}
+
+.map__pin.is-on::after {
+  animation: map-pulse 1.8s var(--ease-out) infinite;
+}
+
+@keyframes map-pulse {
+  from { opacity: 0.8; transform: scale(1); }
+  to   { opacity: 0; transform: scale(3); }
+}
+
+/* The chip stands on its tail: the tip of the tail sits just above the spot */
+/* max-content: the pin has no width, so the chip would otherwise wrap its words */
+.map__tag .chip {
+  position: absolute;
+  left: 0;
+  bottom: 14px;
+  width: max-content;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3) var(--sp-2) var(--sp-2);
+  opacity: 0;
+  transform: translate(-50%, 8px) scale(0.9);
+  transform-origin: 50% 100%;
+  transition: opacity 0.4s var(--ease-out), transform 0.5s var(--ease-out);
+}
+
+.map__tag.is-on .chip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.map__tag .chip__icon {
+  width: 28px;
+  height: 28px;
+}
+
+.map__tag .chip__icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.map__tag .chip .t-h3 {
+  font-size: var(--fs-small);
+}
+
+.chip--tail::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 12px;
+  height: 12px;
+  margin-left: -6px;
+  border-radius: 2px;
+  background: var(--white);
+  transform: rotate(45deg);
+}
+
+@media (max-width: 768px) {
+  .sp {
+    min-height: 360px;
+  }
+  .term {
+    width: 200px;
+  }
+  .sp-terminal .mock-card {
+    width: 160px;
+    right: 4%;
+  }
+  .wallet {
+    max-width: 300px;
+  }
+  .flow__track {
+    margin: 0 28px;
+  }
+  .flow__node {
+    width: 60px;
+  }
+  .map {
+    max-width: 280px;
+  }
+}
+
+/* Scroll dot: the native scrollbar is hidden and this small circle tracks the scroll position */
+
+.scroll-dot {
+  position: fixed;
+  top: 0;
+  right: var(--dot-right);
+  z-index: 110;
+  width: var(--sp-6);
+  height: var(--sp-6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  touch-action: none;
+  transition: opacity 0.4s var(--ease-out);
+}
+
+/* --sx and --sy (set by the script) stretch the dot while the page scrolls fast.
+   The shape is a capsule as long as the longest stretch, cut down with clip-path: the ends stay round,
+   the middle becomes a straight bar, and changing it only repaints this element (no layout). */
+.scroll-dot::before {
+  content: "";
+  flex: none;
+  width: var(--dot-size);
+  height: calc(var(--dot-size) * 2.2);
+  background: var(--color-accent);
+  clip-path: inset(calc(var(--dot-size) * (2.2 - var(--sy, 1)) / 2) calc(var(--dot-size) * (1 - var(--sx, 1)) / 2) round var(--r-pill));
+  transition: scale var(--dur-fast) var(--ease-out), background-color 0.6s var(--ease-out);
+}
+
+.scroll-dot.is-dragging {
+  cursor: grabbing;
+}
+
+.scroll-dot.is-dragging::before {
+  scale: 1.2;
+}
+
+@media (hover: hover) {
+  .scroll-dot:hover::before { scale: 1.2; }
+}
+
+body.is-dark .scroll-dot::before {
+  background: var(--green-400);
+}
+
+.scroll-dot.is-touch {
+  pointer-events: none;
+}
+
+/* Back to top: a white circle the same size as the scroll dot, riding right above it once the page has scrolled.
+   The button is a 44px touch area; the visible circle is its ::before, centred on the dot's axis. */
+.scroll-top {
+  position: fixed;
+  top: 0;
+  right: calc(var(--dot-right) + (var(--sp-6) - var(--top-hit)) / 2);
+  z-index: 110;
+  width: var(--top-hit);
+  height: var(--top-hit);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-700);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s var(--ease-out), visibility 0s 0.4s, color var(--dur-fast) var(--ease-out);
+}
+
+.scroll-top::before {
+  content: "";
+  position: absolute;
+  inset: calc((var(--top-hit) - var(--top-size)) / 2);
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow: var(--shadow-button);
+  transform: scale(0.6);
+  transition: transform 0.5s var(--ease-out);
+}
+
+.scroll-top svg {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  transform: scale(0.6);
+  transition: transform 0.5s var(--ease-out);
+}
+
+.scroll-top.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.4s var(--ease-out), visibility 0s, color var(--dur-fast) var(--ease-out);
+}
+
+.scroll-top.is-shown::before,
+.scroll-top.is-shown svg {
+  transform: none;
+}
+
+.scroll-top.is-shown:active::before {
+  transform: scale(0.92);
+  transition-duration: var(--dur-fast);
+}
+
+/* Grows on hover by the same amount as the scroll dot */
+@media (hover: hover) {
+  .scroll-top.is-shown:hover::before { transform: scale(1.2); }
+}
+
+.scroll-top:focus-visible {
+  outline: none;
+}
+
+.scroll-top:focus-visible::before {
+  outline: 2px solid var(--green-500);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .scroll-top:hover { color: var(--ink-900); }
+  .scroll-top:hover svg { animation: arrow-loop-up var(--dur-hover) var(--ease-inout); }
+}
+
+/* Legal buttons: two small pills stacked at the lower left of the screen, in the style of the back-to-top button
+   (white, soft shadow, grey words); each opens its sheet */
+.legal-dock {
+  position: fixed;
+  left: var(--sp-4);
+  bottom: var(--sp-4);
+  z-index: 110;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sp-2);
+}
+
+.legal-dock__btn {
+  height: 24px;
+  padding: 0 var(--sp-3);
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--white);
+  box-shadow: var(--shadow-button);
+  color: var(--ink-700);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: var(--fw-medium);
+  line-height: 24px;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-out), transform 0.5s var(--ease-out);
+}
+
+.legal-dock__btn:active {
+  transform: scale(0.94);
+  transition-duration: var(--dur-fast);
+}
+
+.legal-dock__btn:focus-visible {
+  outline: 2px solid var(--green-500);
+  outline-offset: 3px;
+}
+
+@media (hover: hover) {
+  .legal-dock__btn:hover { color: var(--ink-900); transform: scale(1.06); }
+}
+
+/* Phones and tablets: no room beside the content, so the buttons would cover it; the footer carries the same two
+   links there */
+@media (max-width: 1024px) {
+  .legal-dock {
+    display: none;
+  }
+}
+
+/* The chevron leaves at the top and comes back in from below */
+@keyframes arrow-loop-up {
+  45%  { transform: translateY(-150%); opacity: 0; }
+  55%  { transform: translateY(150%); opacity: 0; }
+  100% { transform: none; opacity: 1; }
+}
+
+.scroll-dot.is-idle + .scroll-top,
+.scroll-dot.is-empty + .scroll-top,
+body.is-locked .scroll-top {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s var(--ease-out), visibility 0s 0.4s;
+}
+
+.scroll-dot.is-idle,
+.scroll-dot.is-empty,
+body.is-locked .scroll-dot {
+  opacity: 0;
+}
+
+/* Bottom sheet: privacy policy and terms (after the bottom sheets of the Toss app). A white panel with rounded top
+   corners, 60% of the screen wide (90% on a phone), that pops up from the bottom over a dimmed page; its text scrolls
+   inside it. main.js opens and closes it; without the script the footer links show it in place. */
+.sheet {
+  position: fixed;
+  inset: auto 0 0;
+  width: min(80%, 1120px);
+  max-width: none;
+  max-height: 84vh;
+  margin: 0 auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-xl) var(--r-xl) 0 0;
+  background: var(--white);
+  color: var(--ink-900);
+  box-shadow: 0 -8px 40px rgba(17, 25, 39, 0.12);
+  transform: translateY(100%);
+  transition: transform var(--dur-sheet) var(--ease-sheet);
+}
+
+.sheet[open],
+.sheet:target {
+  display: flex;
+  flex-direction: column;
+}
+
+.sheet.is-open,
+.sheet:target {
+  transform: none;
+}
+
+.sheet:target {
+  z-index: 100;
+}
+
+.sheet::backdrop {
+  background: rgba(17, 25, 39, 0);
+  transition: background-color var(--dur-sheet) var(--ease-out);
+}
+
+.sheet.is-open::backdrop {
+  background: rgba(17, 25, 39, 0.45);
+}
+
+.sheet__head {
+  position: relative;
+  flex: none;
+  padding: var(--sp-7) var(--sp-8) var(--sp-5);
+}
+
+/* The small handle at the top, as on a phone sheet */
+.sheet__grip {
+  position: absolute;
+  top: var(--sp-3);
+  left: 50%;
+  width: 40px;
+  height: 4px;
+  margin-left: -20px;
+  border-radius: var(--r-pill);
+  background: var(--ink-200);
+}
+
+.sheet__title {
+  font-size: var(--fs-h3);
+  line-height: var(--lh-h3);
+  letter-spacing: var(--ls-h3);
+  font-weight: var(--fw-bold);
+}
+
+.sheet__close {
+  position: absolute;
+  top: var(--sp-6);
+  right: var(--sp-6);
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-pill);
+  background: var(--bg-soft);
+  color: var(--ink-500);
+  transition: background-color var(--dur-hover) var(--ease-inout), color var(--dur-hover) var(--ease-inout);
+}
+
+.sheet__close svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (hover: hover) {
+  .sheet__close:hover {
+    background: var(--ink-100);
+    color: var(--ink-900);
+  }
+}
+
+.sheet__body {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 var(--sp-8) var(--sp-8);
+  scrollbar-width: none;
+}
+
+.sheet__body::-webkit-scrollbar {
+  display: none;
+}
+
+/* Phones and tablets: in from each side by two thirds of the page's own side margin */
+@media (max-width: 1024px) {
+  .sheet {
+    width: calc(100% - var(--gutter) * 4 / 3);
+  }
+}
+
+/* The same green dot as the page's scroll dot, riding down the right edge of the sheet with its text (main.js);
+   it can be dragged */
+.sheet__dot {
+  position: absolute;
+  top: 0;
+  right: var(--sp-2);
+  width: var(--dot-size);
+  height: var(--dot-size);
+  border-radius: 50%;
+  background: var(--color-accent);
+  cursor: grab;
+  touch-action: none;
+  transition: scale var(--dur-fast) var(--ease-out);
+}
+
+.sheet__dot.is-dragging {
+  cursor: grabbing;
+  scale: 1.2;
+}
+
+@media (hover: hover) {
+  .sheet__dot:hover { scale: 1.2; }
+}
+
+.sheet__body h3 {
+  margin-top: var(--sp-6);
+  font-size: var(--fs-body);
+  line-height: var(--lh-small);
+  font-weight: var(--fw-bold);
+  color: var(--ink-900);
+}
+
+.sheet__body p,
+.sheet__body li {
+  margin-top: var(--sp-2);
+  font-size: var(--fs-small);
+  line-height: 1.7;
+  color: var(--ink-500);
+  word-break: keep-all;
+}
+
+.sheet__body ul {
+  margin-top: var(--sp-2);
+  padding-left: 1.2em;
+  list-style: disc;
+}
+
+.sheet__body li {
+  margin-top: var(--sp-1);
+}
+
+.sheet__body .sheet__date {
+  margin-top: var(--sp-7);
+  color: var(--ink-300);
+}
+
+.footer__legal a {
+  color: inherit;
+}
+
+/* While a sheet is open the page behind it does not scroll */
+html.has-sheet {
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .sheet {
+    max-height: 88vh;
+  }
+  .sheet__head {
+    padding: var(--sp-7) var(--sp-5) var(--sp-4);
+  }
+  .sheet__close {
+    top: var(--sp-5);
+    right: var(--sp-4);
+  }
+  .sheet__body {
+    padding: 0 var(--sp-5) var(--sp-7);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .sheet::backdrop {
+    transition: none;
+  }
+}
+
+/* Section dots (desktop, after the section indicator on toss.im): one dot per section down the left edge of the
+   screen. The dot of the section in view fills with colour and pops out to the right; a dot shows its section's
+   title on hover and scrolls to it on click. Built by main.js. */
+.section-nav {
+  display: none;
+}
+
+@media (min-width: 1025px) {
+  .section-nav {
+    position: fixed;
+    left: var(--sp-2);
+    top: 50%;
+    z-index: 90;
+    display: flex;
+    flex-direction: column;
+    transform: translateY(-50%);
+  }
+}
+
+.section-nav__dot {
+  position: relative;
+  display: block;
+  width: 28px;
+  height: 16px;
+}
+
+.section-nav__dot::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-200);
+  transition: transform 0.5s var(--ease-pop), background-color 0.3s var(--ease-out);
+}
+
+.section-nav__dot.is-active::before {
+  background: var(--color-accent);
+  transform: translateX(8px) scale(1.35);
+}
+
+body.is-dark .section-nav__dot::before {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+body.is-dark .section-nav__dot.is-active::before {
+  background: var(--green-400);
+}
+
+.section-nav__label {
+  position: absolute;
+  left: 36px;
+  top: 50%;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-pill);
+  background: var(--white);
+  box-shadow: var(--shadow-button);
+  font-size: var(--fs-small);
+  color: var(--ink-700);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-6px, -50%);
+  transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+  pointer-events: none;
+}
+
+.section-nav__dot:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--r-pill);
+}
+
+@media (hover: hover) {
+  .section-nav__dot:hover .section-nav__label {
+    opacity: 1;
+    transform: translate(0, -50%);
+  }
+}
+
+.section-nav__dot:focus-visible .section-nav__label {
+  opacity: 1;
+  transform: translate(0, -50%);
+}
+
+/* Forge (development): the company's real back office (a picture of the real page) and a shop page, two Mac
+   windows in a scene that changes scale as it scrolls (main.js). On a desktop the section is held while the scene
+   plays. */
+
+.forge {
+  position: relative;
+  width: 100%;
+  height: 640px;
+  perspective: 1600px;
+}
+
+.forge__stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+/* ---- back office: the real dashboard itself. A picture of the real page (rendered at 1440 x 900 in light mode
+   with the homepage's figures) is scaled to the 1040 px width of the window and cut at the bottom of the 640 px
+   body, never squeezed, so every spot in it stays at 1040/1440 of its real position; the figures the scene counts
+   up are drawn live on top in the real page's type (Noto Sans KR, the same sizes and colours). ---- */
+.forge__sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.forge .ic {
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+.bo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1040px;
+  height: 674px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #eaebed;
+  color: #1d2320;
+  transform: translate(-50%, -50%);
+  transform-origin: 50% 50%;
+  font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  letter-spacing: -0.04em;
+  will-change: transform, opacity;
+}
+
+.bo__body {
+  position: relative;
+  width: 1040px;
+  height: 640px;
+}
+
+.bo__shot {
+  display: block;
+  width: 1040px;
+  height: 640px;
+  object-fit: cover;
+  object-position: 50% 0;
+}
+
+/* the live figures: placed by the script at the blanks in the picture */
+/* the same page in the real dark mode (assets/img/backoffice-dark.webp), over the light one; it spreads in a circle
+   from the dark mode button (at 814, 40 in the window), --reveal 0 to 1 (main.js) */
+.bo__shot--dark {
+  --reveal: 0;
+  position: absolute;
+  left: 0;
+  top: 0;
+  clip-path: circle(calc(var(--reveal) * 1060px) at 814px 40px);
+}
+
+.bo__live {
+  transition: color 0.5s var(--ease-out);
+}
+
+/* the live figures in the real dark mode's colours */
+.bo.is-dark .bo__live { color: #f7f8fa; }
+.bo.is-dark .bo__live small { color: #888992; }
+.bo.is-dark .bo__live--green { color: #49ba9a; }
+.bo.is-dark .bo__live--violet,
+.bo.is-dark .bo__live--violet small { color: #9d8cff; }
+
+.bo__live {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: flex;
+  align-items: baseline;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: #1d2320;
+}
+
+/* the units round the digits, as on the real page: lighter, grey, a space after the won sign */
+.bo__live small {
+  font-weight: 400;
+  letter-spacing: 0;
+  color: #6f7872;
+}
+
+.bo__live small:first-child {
+  margin-right: 0.18em;
+}
+
+.bo__live--foot small {
+  font-weight: 450;
+}
+
+/* sizes come from the real page's boxes (data-bo-at), set by the script; weights and tracking are the real ones */
+.bo__live--wallet { font-weight: 550; letter-spacing: -0.04em; }
+.bo__live--kpi { font-weight: 650; letter-spacing: -0.04em; }
+.bo__live--foot { font-weight: 500; letter-spacing: -0.01em; }
+.bo__live--sum { font-weight: 650; letter-spacing: -0.04em; }
+.bo__live--green { color: #0f8a52; }
+.bo__live--violet { color: #6835ff; }
+
+/* ---- shop page: a real-looking storefront at 440 x 520, scaled by the script ---- */
+.shop {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 440px;
+  height: 470px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--white);
+  color: var(--ink-900);
+  transform: translate(-50%, -50%);
+  transform-origin: 50% 50%;
+  font-size: 12px;
+  letter-spacing: -0.01em;
+  will-change: transform, opacity;
+}
+
+.shop .num {
+  font-variant-numeric: tabular-nums;
+}
+
+.shop__nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 44px;
+  padding: 0 18px;
+  border-bottom: 1px solid var(--ink-100);
+  transform-origin: 0 50%;
+}
+
+.shop__nav > b {
+  font-size: 15px;
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.03em;
+}
+
+.shop__links {
+  display: flex;
+  gap: 12px;
+  font-size: 11.5px;
+  color: var(--ink-700);
+}
+
+.shop__icons {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  color: var(--ink-700);
+  font-size: 15px;
+}
+
+.shop__cart {
+  position: relative;
+  display: inline-flex;
+}
+
+.shop__cart em {
+  position: absolute;
+  top: -6px;
+  right: -7px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--color-accent);
+  color: var(--white);
+  font-style: normal;
+  font-size: 8.5px;
+  font-weight: var(--fw-bold);
+  line-height: 14px;
+  text-align: center;
+}
+
+.shop__body {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 18px 16px;
+}
+
+.shop__banner {
+  display: flex;
+  align-items: center;
+  height: 112px;
+  padding: 0 20px;
+  border-radius: 12px;
+  background: linear-gradient(120deg, #0F9A5F 0%, #22B676 55%, #8CE0B5 100%);
+  color: var(--white);
+  transform-origin: 0 50%;
+}
+
+.shop__banner small {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  opacity: 0.8;
+}
+
+.shop__banner b {
+  display: block;
+  margin-top: 4px;
+  font-size: 19px;
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.03em;
+}
+
+.shop__banner em {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  font-style: normal;
+  font-size: 10px;
+}
+
+.shop__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.shop__item {
+  transform-origin: 0 50%;
+}
+
+.shop__thumb {
+  display: block;
+  height: 96px;
+  border-radius: 10px;
+  background: var(--bg-soft);
+}
+
+.shop__item--p1 .shop__thumb { background: linear-gradient(160deg, #F2E8DF, #D9C3B0); }
+.shop__item--p2 .shop__thumb { background: linear-gradient(160deg, #E6EEF5, #B9CBDD); }
+.shop__item--p3 .shop__thumb { background: linear-gradient(160deg, #EBEBEB, #C9CDD2); }
+
+.shop__item {
+  position: relative;
+}
+
+.shop__item--p1::after {
+  content: "NEW";
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--ink-900);
+  color: var(--white);
+  font-size: 8px;
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.06em;
+}
+
+.shop__item b {
+  display: block;
+  margin-top: 8px;
+  font-size: 11.5px;
+  font-weight: var(--fw-medium);
+}
+
+.shop__item small {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: var(--fw-semibold);
+  color: var(--ink-900);
+}
+
+.shop__pay {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+  padding: 12px 0 0;
+  border-top: 1px solid var(--ink-100);
+  transform-origin: 0 50%;
+}
+
+.shop__pay small {
+  display: block;
+  font-size: 10.5px;
+  color: var(--ink-500);
+}
+
+.shop__pay b {
+  display: block;
+  font-size: 17px;
+  font-weight: var(--fw-bold);
+  letter-spacing: -0.03em;
+}
+
+.shop__btn {
+  position: relative;
+  width: 124px;
+  height: 42px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--ink-900);
+  color: var(--white);
+  font-size: 13px;
+  font-weight: var(--fw-semibold);
+  transform-origin: 50% 50%;
+}
+
+.shop__btn-text,
+.shop__btn-done {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.shop__btn-done {
+  transform: translateY(100%);
+}
+
+.shop__btn-done .ic {
+  font-size: 14px;
+}
+
+.shop__btn.is-done {
+  background: var(--color-accent);
+}
+
+/* ---- Mac window frame on both windows: a light title bar with the three lights and the window's name, a
+   hairline edge and a deep soft shadow ---- */
+.mac {
+  box-shadow: 0 0 0 1px rgba(17, 25, 39, 0.08), 0 1px 2px rgba(17, 25, 39, 0.06), 0 40px 80px -24px rgba(17, 25, 39, 0.42);
+}
+
+.mac__bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 14px;
+  background: linear-gradient(180deg, #f3f4f6, #e9eaed);
+  border-bottom: 1px solid rgba(17, 25, 39, 0.1);
+  font-size: 11px;
+  color: var(--ink-500);
+}
+
+/* the back office's bar turns dark with the page: a dark layer fades in under the lights and the name */
+.bo .mac__bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #1c1c25, #12131a);
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out);
+}
+
+.bo.is-dark .mac__bar::before {
+  opacity: 1;
+}
+
+.bo .mac__bar i {
+  position: relative;
+}
+
+.bo .mac__bar span {
+  z-index: 1;
+  transition: color 0.5s var(--ease-out);
+}
+
+.bo.is-dark .mac__bar span {
+  color: #888992;
+}
+
+.mac__bar i {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.12);
+}
+
+.mac__bar i:nth-child(1) { background: #ff5f57; }
+.mac__bar i:nth-child(2) { background: #febc2e; }
+.mac__bar i:nth-child(3) { background: #28c840; }
+
+.mac__bar span {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 60%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shop .mac__bar span {
+  padding: 3px 14px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(17, 25, 39, 0.08);
+}
+
+.shop__nav {
+  height: 42px;
+}
+
+.forge__cursor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 18px;
+  height: 18px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+@media (max-width: 1024px) {
+  .forge {
+    height: 520px;
+  }
+}
+
+@media (max-width: 768px) {
+  .forge {
+    height: 400px;
+  }
+  .detail .section__visual:has(.forge) .forge {
+    height: 400px;
+  }
+}
+
