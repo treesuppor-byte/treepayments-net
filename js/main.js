@@ -3819,7 +3819,8 @@
          in at its end. Everything after it (the sentences changing, the tree gathering) waits for it. */
       var firstTitle = phrases[0].querySelector(".t-h1");
       var firstLead = phrases[0].querySelector(".t-lead");
-      var setTitleScale = gsap.quickSetter(firstTitle, "scale");
+      var setTitleSX = gsap.quickSetter(firstTitle, "scaleX");
+      var setTitleSY = gsap.quickSetter(firstTitle, "scaleY");
       var setTitleY = gsap.quickSetter(firstTitle, "y", "px");
       gsap.set(firstTitle, { transformOrigin: "50% 50%" });
       var introS = 1, introDy = 0;
@@ -3857,7 +3858,9 @@
         /* the title intro, over the first 0.8 screen once the section covers the screen */
         var k = Math.min(1, Math.max(0, -t / intro));
         var e = k * k * (3 - 2 * k);
-        setTitleScale(introS - (introS - 1) * e);
+        var titleS = introS - (introS - 1) * e;
+        setTitleSX(titleS);
+        setTitleSY(titleS);
         setTitleY(Math.round(introDy * (1 - e)));
         section.style.setProperty("--intro-rest", Math.min(1, Math.max(0, (k - 0.7) / 0.3)).toFixed(3));
         /* The tree starts gathering once the intro is over (later by the intro than when the section turns navy) and
