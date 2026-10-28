@@ -55,15 +55,22 @@
   text-align: center;
 }
 
-/* A 5px white outline on the words (behind the letters), so the cube's lines stop just short of the type; the
-   button gets the same clearance from the cube's drawing (main.js) */
+/* A 5px white halo round the words, so the cube's lines stop just short of the type; the button gets the same
+   clearance from the cube's drawing (main.js). Made of shadows, which every browser paints behind the letters (a
+   text stroke is painted over them in Safari and eats into the letters). */
 .hero__layer:not(.hero__layer--light) .hero__head > * {
-  paint-order: stroke fill;
-  -webkit-text-stroke: 10px var(--white);
+  text-shadow:
+    5px 0 0 var(--white), -5px 0 0 var(--white), 0 5px 0 var(--white), 0 -5px 0 var(--white),
+    3.5px 3.5px 0 var(--white), -3.5px 3.5px 0 var(--white), 3.5px -3.5px 0 var(--white), -3.5px -3.5px 0 var(--white),
+    4.6px 1.9px 0 var(--white), -4.6px 1.9px 0 var(--white), 4.6px -1.9px 0 var(--white), -4.6px -1.9px 0 var(--white),
+    1.9px 4.6px 0 var(--white), -1.9px 4.6px 0 var(--white), 1.9px -4.6px 0 var(--white), -1.9px -4.6px 0 var(--white);
 }
 
-.hero__layer:not(.hero__layer--light) .hero__head .btn {
-  -webkit-text-stroke: 0;
+/* The brand word's letters each stand in a box of their own, so a halo on one would cover the letter before it; the
+   cube keeps clear of the whole word instead (main.js) */
+.hero__layer:not(.hero__layer--light) .hero__head .btn,
+.hero__layer:not(.hero__layer--light) .hero__fill {
+  text-shadow: none;
 }
 
 .hero__head .t-lead {
@@ -647,6 +654,14 @@
 /* The notebook cards are white on the grey section */
 .step-visual .tile {
   background: var(--white);
+}
+
+/* On the notebook's white paper the scenes' own white boxes melt away; the same scenes on the services page lie on a
+   grey tile, so there the boxes are taken off to look the same (the lit icons keep their colour) */
+.detail__visual .wallet__card,
+.detail__visual .flow__pay,
+.detail__visual .flow__node:not(.is-on) i {
+  background: none;
 }
 
 /* The waiting cards sit a little to the right of and below the one in front, like a stack seen slightly from the side.
@@ -1260,19 +1275,20 @@
   border-radius: 0 6px 6px 0;
   background: linear-gradient(90deg, rgba(140, 224, 181, 0.12) 0%, var(--green-300) 70%, var(--green-100) 100%);
   box-shadow: 0 0 18px rgba(140, 224, 181, 0.45);
-  transition: background var(--dur-bg) var(--ease-inout);
+  transition: background var(--dur-bg) var(--ease-inout), box-shadow var(--dur-bg) var(--ease-inout);
 }
 
-/* A band of light runs along each bar now and then, each bar a little after the one above (while on screen) */
+/* A band of light runs along each bar now and then, each bar a little after the one above (while on screen). The band
+   fades in from the left as the bar does (mask), so it never shows as a white patch over the bar's faint start. */
 .stat__bar::after {
   content: "";
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  width: 30%;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.75) 50%, rgba(255, 255, 255, 0) 100%);
-  transform: translateX(-120%);
+  inset: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.75) 50%, rgba(255, 255, 255, 0) 100%) no-repeat;
+  background-size: 30% 100%;
+  background-position: -50% 0;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 70%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 70%);
   animation: bar-shine 3.2s var(--ease-inout) infinite paused;
 }
 
@@ -1285,8 +1301,8 @@
 .stat--4 .stat__bar::after { animation-delay: 0.75s; }
 
 @keyframes bar-shine {
-  0% { transform: translateX(-120%); }
-  45%, 100% { transform: translateX(420%); }
+  0% { background-position: -50% 0; }
+  45%, 100% { background-position: 150% 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1305,12 +1321,15 @@
   max-width: var(--stat-text);
 }
 
+/* The name and its basis always stay on one line, so every row has the same spacing (a longer one runs past the text
+   column into the room the shorter bars leave) */
 .stat__label {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: baseline;
   column-gap: var(--sp-2);
   margin: 0;
+  white-space: nowrap;
 }
 
 .stats .stat__label .t-label {
@@ -1363,9 +1382,10 @@
   will-change: transform;
 }
 
+/* On the white band the bar starts pale mint rather than clear, so its start never reads as a white gap */
 .sec-stats.is-day .stat__bar {
-  background: linear-gradient(90deg, rgba(34, 182, 118, 0.08) 0%, var(--green-500) 100%);
-  box-shadow: none;
+  background: linear-gradient(90deg, var(--green-100) 0%, var(--green-300) 55%, var(--green-500) 100%);
+  box-shadow: 0 0 18px rgba(140, 224, 181, 0);
 }
 
 @media (max-width: 1024px) {
@@ -1768,13 +1788,35 @@
 /* H. Call to action: centred on the home page, split (.sec-cta--split) on sub pages */
 
 /* Notice banner (home): a square-cornered grey banner as tall as the section, centred in the space left of the
-   centred call (wide screens). It rises into place with the scroll, its small notes coming in one by one
-   (main.js). Below the call on narrower screens. */
+   centred call (wide screens). Narrower screens: a grey band from edge to edge under the call, meeting the footer;
+   its grey spreads out from the middle with the scroll (--spread, main.js; 1 without the script) and its small notes
+   come in one by one. */
 .notice {
-  margin: var(--sp-9) var(--gutter) 0;
-  padding: var(--sp-7) var(--sp-6);
+  position: relative;
+  isolation: isolate;
+  margin-top: var(--sp-9);
+  padding: var(--sp-8) var(--gutter);
+}
+
+.notice::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
   background: var(--ink-100);
-  will-change: transform;
+  transform: scaleX(var(--spread, 1));
+}
+
+.notice > * {
+  max-width: 640px;
+  margin-inline: auto;
+}
+
+/* The band meets the footer: no space under it */
+@media (max-width: 1199px) {
+  .sec-cta {
+    padding-bottom: 0;
+  }
 }
 
 .notice__label {
@@ -1813,6 +1855,40 @@
   color: var(--ink-700);
 }
 
+/* The same notes on the contact page: no panel, just the small print under the cards, set close like the notes at the
+   foot of a product page, each line after a small dot */
+.notes {
+  max-width: 760px;
+  margin-top: var(--sp-9);
+}
+
+.notes__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+}
+
+.notes__list .notice__item {
+  position: relative;
+  padding-left: 0.9em;
+}
+
+.notes__list .notice__item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.75em;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--ink-300);
+}
+
+.notes .notice__foot {
+  margin-top: var(--sp-4);
+}
+
 /* The grey behind the banner (wide screens): a layer as big as the section, cut down to the banner's place. The script
    first sweeps it across the whole section from the right, then gathers it into the banner. */
 .notice-sweep {
@@ -1831,6 +1907,13 @@
   .sec-cta > .container {
     position: relative;
     z-index: 1;
+  }
+  .notice::before {
+    display: none;
+  }
+  .notice > * {
+    max-width: none;
+    margin-inline: 0;
   }
   .notice {
     z-index: 1;
@@ -2449,6 +2532,7 @@
 .pic-a { fill: var(--green-500); }
 .pic-b { fill: var(--green-200); }
 .pic-c { fill: var(--ink-200); }
+.pic-w { fill: var(--white); }
 
 .pic-line {
   fill: none;
