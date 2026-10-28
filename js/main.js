@@ -947,7 +947,7 @@
   /* Ulleungdo as a small cluster of three dots, Dokdo as its two islets */
   var ISLETS = [[130.86, 37.5, 3], [131.87, 37.24, 2]];
   /* Rough line of the military demarcation line, west to east: dots north of it are drawn faint */
-  var BORDER = [[124.0, 37.9], [125.8, 37.72], [126.55, 37.76], [126.68, 37.96], [127.0, 38.15], [127.3, 38.27],
+  var BORDER = [[124.0, 37.55], [125.95, 37.55], [126.3, 37.7], [126.55, 37.76], [126.68, 37.96], [127.0, 38.15], [127.3, 38.27],
     [127.7, 38.31], [128.0, 38.3], [128.35, 38.62], [129.5, 38.62]];
 
   function northOfBorder(lon, lat) {
@@ -1256,15 +1256,20 @@
          tablets (the middle photo between them) */
       var side = small.matches ? window.innerWidth * 0.25 - tokenPx("--gap-card", 16) / 2
         : (window.innerWidth - tokenPx("--container", 1200)) / 2 - tokenPx("--sp-8", 64);
-      var left = side, right = window.innerWidth - side;
+      var left = side, right = window.innerWidth - side, vw = window.innerWidth;
       for (var i = 0; i < imgs.length; i++) {
         var r = imgs[i].parentNode.getBoundingClientRect();
         var out = r.width ? (Math.max(0, left - r.left) + Math.max(0, r.right - right)) / r.width : 0;
         var b = wide.matches || small.matches ? Math.round(Math.min(1, out) * 12) / 2 : 0;
-        if (b === last[i]) continue;
+        /* the picture grows slowly inside its card on its way across, from 1 as it comes in on the right to 1.08 as it
+           leaves on the left; it never shrinks on screen, and comes round again at 1 */
+        var k = r.width ? Math.min(1, Math.max(0, (vw - r.left) / (vw + r.width))) : 0;
+        var s = Math.round((1 + k * 0.08) * 1000) / 1000;
+        if (b === last[i] && s === imgs[i].zoom) continue;
+        imgs[i].zoom = s;
+        if (b !== last[i]) imgs[i].style.filter = b ? "blur(" + b + "px)" : "";
         last[i] = b;
-        imgs[i].style.filter = b ? "blur(" + b + "px)" : "";
-        imgs[i].style.transform = b ? "scale(1.06)" : "";
+        imgs[i].style.transform = "scale(" + s + ")";
       }
       frame = requestAnimationFrame(step);
     }
@@ -1491,13 +1496,13 @@
       if (!intro) return;
       var tl = gsap.timeline({ onUpdate: function () { intro.at(tl.time()); } });
       var dur = intro.into(tl);
-      /* the process steps (desktop, in a row) are drawn while the section is still held; a photo strip stays held a
-         while after its cards have come in (less on phones and tablets). The intro itself takes the first 0.6 screen; the rest of the hold is
-         plain time at the end of the timeline, so the title does not move slower for it. */
+      /* the process steps are drawn with the scroll while the section is still held (desktop, in a row: 1 screen, and
+         half a screen more for the last step to type; stacked: 0.75 screen, and a little more); a photo strip is let go
+         soon after its cards have come in (sooner on phones and tablets). The intro itself takes the first 0.6
+         screen; the rest of the hold is plain time at the end of the timeline, so the title does not move slower for it. */
       var wide = window.matchMedia("(min-width: 1025px)").matches;
-      /* phones and tablets: a swipe moves less than a wheel, so the photo strip is held a shorter while there */
-      var extra = section.querySelector(".process") && wide ? 1.6
-        : section.querySelector(".stream") ? (wide ? 0.9 : 0.35) : 0;
+      var extra = section.querySelector(".process") ? (wide ? 1.5 : 0.9)
+        : section.querySelector(".stream") ? (wide ? 0.3 : 0.1) : 0;
       if (extra) tl.to({}, { duration: dur * extra / 0.6 }, dur);
       section.introPin = ScrollTrigger.create({
         trigger: section,
@@ -1514,8 +1519,9 @@
   /* Forge (development): a scrolled scene in three beats. 1: the back office fills the stage. 2: it shrinks and
      leans away to the right while the shop page comes up large in front and is assembled by a cursor. 3: the cursor
      presses pay: the button turns to "paid", the two windows settle side by side and the back office's figures count
-     up. Only the two windows: nothing is drawn between or over them. On a desktop the section is held while this
-     plays; on narrow screens it plays on its own when it comes into view. */
+     up. Only the two windows: nothing is drawn between or over them. On the home page (every screen) the section is
+     held while the scroll runs the scene up to the shop coming in, and the rest plays by itself; elsewhere the whole
+     scene plays on its own when it comes into view. */
   function initForge() {
     if (!hasGsap || reduceMotion) return;
     document.querySelectorAll("[data-forge]").forEach(function (forge) {
@@ -1542,9 +1548,9 @@
         Array.prototype.forEach.call(el.querySelectorAll("small"), function (u, i) { u.style.fontSize = (i === 0 ? at[4] : at[5] || at[4]) + "px"; });
         return { el: el, num: el.querySelector("span") || el, from: +v[0], to: +v[1], v: +v[0] };
       });
-      var pinned = section.classList.contains("sec-forge") && window.matchMedia("(min-width: 1025px) and (min-height: 700px)").matches;
+      var pinned = section.classList.contains("sec-forge");
       if (pinned) section.classList.add("is-scene");
-      /* held on a desktop: the scene opens with the title intro (initTitleIntro) before the back office comes up */
+      /* held: the scene opens with the title intro (initTitleIntro) before the back office comes up */
       var intro = pinned && hasGsap ? titleIntro(section) : null;
 
       /* sizes: the stage decides how large each window may get, 18px above and below kept for the shadows; on a
@@ -1665,22 +1671,57 @@
       }
 
       build();
+      /* held: the scroll runs the scene up to the shop having come in front of the leaning back office (1.9 screens
+         with the title intro); from there it plays on by itself to its end, and further scrolling simply goes on down
+         the page. Scrolling back into the hold hands the scene back to the scroll at that point. */
+      var splitAt = function () { return (tl.labels.lean || 0) + 1.4; };
+      var drive = { t: 0 };
+      var autoRun = null;
       if (pinned) {
         ScrollTrigger.create({
           trigger: section,
           start: "top top",
-          end: function () { return "+=" + window.innerHeight * (intro ? 4.2 : 3.8); },
+          end: function () { return "+=" + window.innerHeight * (intro ? 1.9 : 1.5); },
           pin: true,
           scrub: 0.8,
-          animation: tl,
-          invalidateOnRefresh: true
+          animation: gsap.to(drive, { t: 1, ease: "none", paused: true, onUpdate: function () { if (!autoRun) tl.time(drive.t * splitAt()); } }),
+          invalidateOnRefresh: true,
+          onLeave: function () {
+            if (autoRun) autoRun.kill();
+            autoRun = tl.tweenFromTo(splitAt(), tl.duration(), { ease: "none" });
+          },
+          onEnterBack: function () {
+            if (autoRun) { autoRun.kill(); autoRun = null; }
+            tl.time(splitAt());
+          }
         });
       } else {
+        /* Not held: the scene plays by itself while it is on screen, rests 2.2 s on its last frame, fades out and
+           starts over; off screen it waits where it is */
+        var shown = false, rest = null;
+        var again = function () {
+          gsap.to(forge, {
+            opacity: 0, duration: 0.4, ease: "power1.in",
+            onComplete: function () {
+              rest = null;
+              reset();
+              tl.pause(0);
+              gsap.to(forge, { opacity: 1, duration: 0.3, ease: "power1.out" });
+              if (shown) tl.play();
+            }
+          });
+        };
+        tl.eventCallback("onComplete", function () { rest = gsap.delayedCall(2.2, again); });
         ScrollTrigger.create({
           trigger: forge,
           start: "top 80%",
-          once: true,
-          onEnter: function () { tl.play(); }
+          end: "bottom top",
+          onToggle: function (self) {
+            shown = self.isActive;
+            if (rest) rest.paused(!shown);
+            else if (shown) tl.play();
+            else tl.pause();
+          }
         });
       }
       ScrollTrigger.addEventListener("refreshInit", function () {
@@ -1688,7 +1729,12 @@
         S = fit();
         reset();
         build();
-        if (!pinned && p > 0) tl.progress(1);
+        if (pinned) {
+          if (autoRun) {
+            autoRun.kill();
+            autoRun = tl.tweenFromTo(Math.max(splitAt(), tl.duration() * p), tl.duration(), { ease: "none" });
+          } else tl.time(drive.t * splitAt());
+        } else if (p > 0) tl.progress(p, true);
       });
     });
   }
@@ -1909,7 +1955,9 @@
       var title = section.querySelector(".steps-grid__head .t-h1");
       var introLen = function () { return title ? window.innerHeight * 0.45 : 0; };
       var stepsLen = function () { return steps.length * window.innerHeight * 0.75; };
-      var pinLength = function () { return "+=" + (introLen() + stepsLen()); };
+      /* the last step is held as long again, so its scene can play to its end before the section is let go */
+      var tailLen = function () { return window.innerHeight * 0.75; };
+      var pinLength = function () { return "+=" + (introLen() + stepsLen() + tailLen()); };
       if (title) {
         section.classList.add("has-intro", "is-intro");
         gsap.set(title, { transformOrigin: "50% 50%" });
@@ -1976,6 +2024,8 @@
           }
         },
         onToggle: function (self) {
+          /* let go downwards: the last scene, still on screen as the section moves up, plays on to its result */
+          if (!self.isActive && self.progress >= 1) return;
           visuals.forEach(function (v, k) {
             var sp = controllerFor(v);
             if (!sp) return;
@@ -1986,6 +2036,23 @@
 
       growTree(section, introLen, stepsLen);
     });
+  }
+
+  /* Tree drawing (home steps): it shows on wide screens only, so it waits in a template and is put in the page the
+     first time the screen is wide enough; phones never build it */
+  function initTreeArt() {
+    var arts = document.querySelectorAll(".tree > template.tree__art");
+    if (!arts.length) return;
+    var wide = window.matchMedia("(min-width: 1025px)");
+    function place() {
+      if (!wide.matches) return;
+      Array.prototype.forEach.call(arts, function (art) {
+        if (art.parentNode) art.parentNode.replaceChild(art.content.cloneNode(true), art);
+      });
+    }
+    place();
+    if (wide.addEventListener) wide.addEventListener("change", place);
+    else if (wide.addListener) wide.addListener(place);
   }
 
   /* Tree (home steps): the outline tree, drawn line by line from the ground up while the steps scroll */
@@ -2099,24 +2166,20 @@
       measure();
       ScrollTrigger.addEventListener("refresh", measure);
 
+      var holder = process.closest(".has-intro");
       var vars = {
         ease: "none",
-        /* desktop with the title intro: drawn while the section is held, after the intro (0.6 screen), over 1.3
-           screens, leaving 0.3 screen for the last step to finish typing; stacked: as the steps scroll by */
-        scrollTrigger: process.closest(".has-intro") && !vertical && process.closest(".has-intro").introPin ? {
-          trigger: process.closest(".has-intro"),
+        /* with the title intro: drawn while the section is held, after the intro (0.6 screen), over 1 screen in a row
+           (desktop) or 0.75 screen stacked, so each step's number fills and types in turn while the steps stand still
+           on the screen; the rest of the hold leaves the last step time to finish typing */
+        scrollTrigger: holder && holder.introPin ? {
+          trigger: holder,
           /* from the hold's own start (the section's place on the page includes the space the hold adds) */
-          start: function () { return process.closest(".has-intro").introPin.start + Math.round(window.innerHeight * 0.6); },
-          end: function () { return "+=" + Math.round(window.innerHeight * 1.3); },
+          start: function () { return holder.introPin.start + Math.round(window.innerHeight * 0.6); },
+          end: function () { return "+=" + Math.round(window.innerHeight * (vertical ? 0.75 : 1)); },
           scrub: 0.6,
           invalidateOnRefresh: true
-        } : process.closest(".has-intro") ? {
-          trigger: process,
-          pinnedContainer: process.closest(".has-intro"),
-          start: function () { return "top " + Math.round(introTop(process) - 10) + "px"; },
-          end: "bottom 55%",
-          scrub: 0.6
-        } : { trigger: process, start: "top 75%", end: "bottom 55%", scrub: 0.6 },
+        } : { trigger: process, start: "top 85%", end: "bottom 85%", scrub: 0.6 },
         onUpdate: function () {
           var tip = this.progress() * length;
           marks.forEach(function (m, k) {
@@ -2356,12 +2419,26 @@
       var rows = Array.prototype.slice.call(chart.querySelectorAll(".stat"));
       var scene = window.matchMedia("(min-width: 1025px) and (min-height: 700px)").matches;
       if (scene) section.classList.add("is-scene");
+      /* narrower screens hold the band for the map (below), so the bars, inside it, are measured past that hold */
+      var held = !scene && !!intro.querySelector(".map") ? section : undefined;
       /* The light runs along the bars only while the band is on screen */
-      ScrollTrigger.create({ trigger: chart, start: "top bottom", end: "bottom top", toggleClass: { targets: section, className: "is-glowing" } });
+      /* (measured after the hold itself, which is set up further down: refreshPriority -1) */
+      ScrollTrigger.create({ trigger: chart, pinnedContainer: held, refreshPriority: held ? -1 : 0, start: "top bottom", end: "bottom top", toggleClass: { targets: section, className: "is-glowing" } });
+      /* with the hold, the bars grow from its end, over as much scroll as the chart's height and a bit */
+      var holdST = null;
       var tl = gsap.timeline({
         scrollTrigger: scene
           ? { trigger: section, start: "top top", end: function () { return "+=" + window.innerHeight * 1.6; }, pin: true, scrub: 0.8, invalidateOnRefresh: true }
-          : { trigger: chart, start: "top 90%", end: "bottom 75%", scrub: 0.8 }
+          : held
+            ? {
+              trigger: chart,
+              refreshPriority: -1,
+              start: function () { return holdST ? holdST.end : 0; },
+              end: function () { return (holdST ? holdST.end : 0) + chart.offsetHeight + window.innerHeight * 0.15; },
+              scrub: 0.8,
+              invalidateOnRefresh: true
+            }
+            : { trigger: chart, start: "top 90%", end: "bottom 75%", scrub: 0.8 }
       });
 
       /* The map arrives large and close, turned a little to the left, and settles into place as the band comes up;
@@ -2377,11 +2454,66 @@
              aside and lays it flat; one owner for its turn, so nothing else can push it out of size */
           gsap.set(mapIn, { rotationY: -16, rotationX: 28, z: 0, transformPerspective: 3200 });
         } else {
-          gsap.fromTo(mapIn, { rotationY: -26, rotationX: 9, z: 280 }, {
-            rotationY: 0, rotationX: 0, z: 0,
-            ease: "power2.out",
-            scrollTrigger: { trigger: mapIn, start: "top 95%", end: "top 35%", scrub: 0.6 }
+          /* Narrower screens: the band is held for a screen once it reaches the top. First the title floats in the
+             middle of the screen above the map, which stands large and at a slant (its dots coins with height); then
+             the map settles flat into its place under the title while the title moves up to its own place at the top
+             left, and the label and the words come in round it */
+          var headN = intro.querySelector(".section__head");
+          var titleN = headN ? headN.querySelector(".t-h1") : null;
+          var partsN = headN ? Array.prototype.slice.call(headN.children).filter(function (el) { return el !== titleN; }) : [];
+          [mapIn, titleN].concat(partsN).forEach(function (el) {
+            if (!el) return;
+            el.removeAttribute("data-reveal");
+            el.removeAttribute("data-reveal-delay");
           });
+          var bigN = { s: 1, x: 0, y: 0, tx: 0, ty: 0 };
+          /* layout offsets, not drawn boxes, so the moved map and title measure the same */
+          var offsetN = function (el) {
+            var x = 0, y = 0;
+            for (var e = el; e && e !== section; e = e.offsetParent) { x += e.offsetLeft; y += e.offsetTop; }
+            return { x: x, y: y };
+          };
+          var placeN = function () {
+            var vw = window.innerWidth, vh = window.innerHeight, top = tokenPx("--header-h", 56);
+            var m = offsetN(mapIn);
+            var w = mapIn.offsetWidth || 1, h = mapIn.offsetHeight || 1;
+            var th = titleN ? titleN.offsetHeight : 0, gap = titleN ? 24 : 0;
+            bigN.s = Math.max(1, Math.min(1.5, ((vh - top) * 0.86 - th - gap) / h, vw * 1.15 / w));
+            /* the title and the large map as one block in the middle of the screen under the header */
+            var y0 = top + Math.max(16, ((vh - top) - (th + gap + h * bigN.s)) / 2);
+            bigN.x = vw / 2 - (m.x + w / 2);
+            bigN.y = y0 + th + gap + h * bigN.s / 2 - (m.y + h / 2);
+            if (titleN) {
+              var t = offsetN(titleN);
+              var range = document.createRange();
+              range.selectNodeContents(titleN);
+              var textW = range.getBoundingClientRect().width || titleN.offsetWidth;
+              bigN.tx = vw / 2 - (t.x + textW / 2);
+              bigN.ty = y0 - t.y;
+            }
+          };
+          placeN();
+          ScrollTrigger.addEventListener("refreshInit", placeN);
+          gsap.set(mapIn, { transformOrigin: "50% 50%", transformPerspective: 1600 });
+          mapIn.mapDepth = 1;
+          mapIn.mapZoom = 1.5;
+          if (mapIn.redraw) mapIn.redraw();
+          var depthN = { v: 1 };
+          holdST = gsap.timeline({
+            scrollTrigger: { trigger: section, start: "top top", end: function () { return "+=" + window.innerHeight; }, pin: true, scrub: 0.8, invalidateOnRefresh: true }
+          })
+            .fromTo(mapIn, {
+              x: function () { return bigN.x; },
+              y: function () { return bigN.y; },
+              scale: function () { return bigN.s; },
+              rotationX: 28,
+              rotationY: -16
+            }, { x: 0, y: 0, scale: 1, rotationX: 0, rotationY: 0, duration: 1, ease: "power3.inOut" }, 0.2)
+            .fromTo(titleN, { x: function () { return bigN.tx; }, y: function () { return bigN.ty; } }, { x: 0, y: 0, duration: 1, ease: "power3.inOut" }, 0.2)
+            .fromTo(depthN, { v: 1 }, { v: 0, duration: 0.8, ease: "power2.inOut", immediateRender: false, onUpdate: function () { mapIn.mapDepth = depthN.v; if (mapIn.repaint) mapIn.repaint(); } }, 0.3)
+            .fromTo(partsN, { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.08, ease: "power2.out" }, 0.85)
+            .set({}, {}, "+=0.15")
+            .scrollTrigger;
         }
       }
 
@@ -2549,8 +2681,10 @@
     /* lines, corner dots and labels in the side captions' colour (--sage-200), at the same full strength */
     var hex = getComputedStyle(document.documentElement).getPropertyValue("--sage-200").trim().replace("#", "") || "D7DBD9";
     var tone = [0, 2, 4].map(function (i) { return parseInt(hex.slice(i, i + 2), 16); }).join(", ");
-    /* the button: the cube's lines stop 5px short of it, as they do round the outlined words */
+    /* the button and the brand word (its letters stand in boxes of their own, so they carry no halo): the cube's
+       lines stop 5px short of them, as they do round the other words */
     var button = hero.querySelector(".hero__layer:not(.hero__layer--light) .hero__head .btn");
+    var blank = hero.querySelector(".hero__layer:not(.hero__layer--light) .hero__blank");
     var lean = { x: 0, y: 0 };
     var frame = 0;
     var font = (isDesktop ? 11 : 9) + "px " + getComputedStyle(document.body).fontFamily;
@@ -2623,12 +2757,19 @@
         ctx.fillStyle = "rgba(" + tone + ", " + fade.k + ")";
         ctx.fillText(LABELS[k], lx, q[1]);
       }
-      if (button) {
-        var cr = canvas.getBoundingClientRect(), br = button.getBoundingClientRect(), pad = 5;
-        var bx = br.left - cr.left - pad, by = br.top - cr.top - pad, bw = br.width + pad * 2, bh = br.height + pad * 2;
+      if (button || blank) {
+        var cr = canvas.getBoundingClientRect(), pad = 5;
         ctx.globalCompositeOperation = "destination-out";
         ctx.beginPath();
-        if (ctx.roundRect) ctx.roundRect(bx, by, bw, bh, bh / 2); else ctx.rect(bx, by, bw, bh);
+        if (button) {
+          var br = button.getBoundingClientRect();
+          var bx = br.left - cr.left - pad, by = br.top - cr.top - pad, bw = br.width + pad * 2, bh = br.height + pad * 2;
+          if (ctx.roundRect) ctx.roundRect(bx, by, bw, bh, bh / 2); else ctx.rect(bx, by, bw, bh);
+        }
+        if (blank) {
+          var kr = blank.getBoundingClientRect();
+          ctx.rect(kr.left - cr.left - pad, kr.top - cr.top - pad, kr.width + pad * 2, kr.height + pad * 2);
+        }
         ctx.fill();
         ctx.globalCompositeOperation = "source-over";
       }
@@ -2887,6 +3028,13 @@
         tx[i] = x; ty[i] = y; tz[i] = z; nx[i] = mx; ny[i] = my; nz[i] = mz; kind[i] = k;
         var c = ball();
         sx[i] = c[0] * 4.2; sy[i] = 0.55 + c[1] * 1.9; sz[i] = c[2] * 2.6;
+        /* only one point in four floats about the screen before the gathering; the others wait well out of sight
+           round it (on a ring past the screen's edges, no extra random numbers, so the tree keeps its shape) and fly
+           in when it is their turn */
+        if (i % 4) {
+          var ring = Math.sqrt(c[0] * c[0] + c[1] * c[1]) || 1;
+          sx[i] = c[0] / ring * 4.6; sy[i] = 0.55 + c[1] / ring * 3; sz[i] = c[2] * 0.6;
+        }
         /* when each point sets off, by height: the crown's last points land exactly as the gathering is whole (1) */
         delay[i] = 0.3 + Math.min(1, Math.max(0, y / 1.15)) * 0.33 + rand() * 0.05;
         drift[i] = rand() * Math.PI * 2;
@@ -2941,6 +3089,8 @@
         var t = time * 0.0004;
         for (var i = 0; i < N; i++) {
           var q = (grown - delay[i]) / 0.32;
+          /* a point waiting out of sight for its turn is neither worked out nor drawn */
+          if (q <= 0 && i % 4) continue;
           q = q < 0 ? 0 : q > 1 ? 1 : q;
           var e = q * q * (3 - 2 * q);
           var loose = 1 - e;
@@ -3342,15 +3492,18 @@
      page scrolls on, and stand in place when the section reaches the top of the screen */
   function initPartnerStrips() {
     if (!hasGsap || reduceMotion) return;
-    /* Phone: the strips are rows. They slide in from the left one after another, and the row in the middle of the
+    /* Phone: the strips are rows. Each slides in from the left as it comes up into the lower part of the screen
+       (each on its own, so the lower rows are not already in before they are seen), and the row in the middle of the
        screen shows in colour. */
     if (!window.matchMedia("(min-width: 769px)").matches) {
       document.querySelectorAll(".partner-strips").forEach(function (group) {
         var strips = group.querySelectorAll(".partner-strip");
-        gsap.timeline({
-          scrollTrigger: { trigger: group, start: "top 85%", end: "top 35%", scrub: 0.8 }
-        }).from(strips, { xPercent: -100, duration: 1, ease: "power2.out", stagger: 0.3 });
         strips.forEach(function (strip) {
+          gsap.from(strip, {
+            xPercent: -100,
+            ease: "power2.out",
+            scrollTrigger: { trigger: strip, start: "top 95%", end: "top 62%", scrub: 0.8 }
+          });
           ScrollTrigger.create({ trigger: strip, start: "top 58%", end: "bottom 42%", toggleClass: "is-lit" });
         });
       });
@@ -3389,15 +3542,22 @@
           var right = section.offsetWidth - notice.offsetLeft - notice.offsetWidth;
           return "inset(0px " + right + "px 0px " + notice.offsetLeft + "px)";
         };
-        var sweepIn = gsap.fromTo(sweep, { clipPath: none }, { clipPath: full, duration: 0.45, ease: "power2.inOut" });
-        var gather = gsap.to(sweep, { clipPath: banner, duration: 0.4, ease: "power2.inOut" });
-        /* The section stops once it fills the screen and the whole sweep plays over a screen and a half of scrolling */
+        var sweepIn = gsap.fromTo(sweep, { clipPath: none }, { clipPath: full, duration: 0.7, ease: "power2.inOut" });
+        var gather = gsap.to(sweep, { clipPath: banner, duration: 0.6, ease: "power2.inOut" });
+        /* The sweep and the gathering play by themselves, in one go, as the section comes up the screen (back again if
+           the page is scrolled back above it) */
+        var cover = gsap.timeline({ paused: true }).add(sweepIn, 0).add(gather, 0.8);
+        ScrollTrigger.create({
+          trigger: section,
+          start: "top 35%",
+          onEnter: function () { cover.play(); },
+          onLeaveBack: function () { cover.reverse(); }
+        });
+        /* then the section stops for a little more than half a screen while the lines come up one by one with the scroll */
         gsap.timeline({
-          scrollTrigger: { trigger: section, start: "top top", end: function () { return "+=" + window.innerHeight * 1.5; }, pin: true, scrub: 1, invalidateOnRefresh: true }
+          scrollTrigger: { trigger: section, start: "top top", end: function () { return "+=" + window.innerHeight * 0.6; }, pin: true, scrub: 0.8, invalidateOnRefresh: true }
         })
-          .add(sweepIn, 0)
-          .add(gather, 0.45)
-          .fromTo(lines, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.2, ease: "power2.out", stagger: 0.03 }, 0.75)
+          .fromTo(lines, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out", stagger: 0.08 }, 0)
           .set({}, {}, "+=0.1");
         /* Only the cut-outs depend on the layout; the lines keep their hidden start */
         ScrollTrigger.addEventListener("refreshInit", function () {
@@ -3406,17 +3566,17 @@
         });
         return;
       }
-      gsap.set(notice, { y: 40, opacity: 0 });
-      gsap.set(lines, { opacity: 0, y: 16 });
+      /* Narrower screens, where the banner runs edge to edge under the call: once its top comes up to 85% of the
+         screen its grey spreads out from the middle to both edges at an even pace (1 s, however fast the page is
+         scrolled), then the lines come up one by one; back above it, it folds away again */
+      var spread = gsap.timeline({ paused: true })
+        .fromTo(notice, { "--spread": 0 }, { "--spread": 1, duration: 1, ease: "power1.inOut" }, 0)
+        .fromTo(lines, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, ease: "power2.out", stagger: 0.08 }, 0.7);
       ScrollTrigger.create({
         trigger: notice,
-        start: "top 90%",
-        once: true,
-        onEnter: function () {
-          gsap.timeline()
-            .to(notice, { y: 0, opacity: 1, duration: 1, ease: motion.easeText })
-            .to(lines, { opacity: 1, y: 0, duration: 0.8, ease: motion.easeText, stagger: 0.08 }, 0.4);
-        }
+        start: "top 85%",
+        onEnter: function () { spread.play(); },
+        onLeaveBack: function () { spread.reverse(); }
       });
     });
   }
@@ -3430,6 +3590,8 @@
 
     function open(sheet) {
       sheet.showModal();
+      /* the sheet takes the focus itself, so no focus ring is drawn round its close button on opening */
+      sheet.focus({ preventScroll: true });
       sheet.querySelector(".sheet__body").scrollTop = 0;
       if (sheet.measureDot) sheet.measureDot();
       document.documentElement.classList.add("has-sheet");
@@ -3498,6 +3660,36 @@
         dot.addEventListener("pointermove", move);
         dot.addEventListener("pointerup", up);
         dot.addEventListener("pointercancel", up);
+      });
+
+      /* Drag down by the head (the handle) to close: the sheet follows the finger, and is let go downwards past a
+         quarter of its height or with a quick flick; otherwise it springs back */
+      sheet.setAttribute("tabindex", "-1");
+      var head = sheet.querySelector(".sheet__head");
+      head.addEventListener("pointerdown", function (e) {
+        if (e.button > 0 || e.target.closest(".sheet__close") || !sheet.classList.contains("is-open")) return;
+        head.setPointerCapture(e.pointerId);
+        var startY = e.clientY, lastY = e.clientY, lastT = performance.now(), speed = 0, dy = 0;
+        sheet.classList.add("is-dragging");
+        function move(ev) {
+          dy = Math.max(0, ev.clientY - startY);
+          var now = performance.now();
+          speed = (ev.clientY - lastY) / Math.max(1, now - lastT);
+          lastY = ev.clientY;
+          lastT = now;
+          sheet.style.transform = "translateY(" + dy + "px)";
+        }
+        function up() {
+          head.removeEventListener("pointermove", move);
+          head.removeEventListener("pointerup", up);
+          head.removeEventListener("pointercancel", up);
+          sheet.classList.remove("is-dragging");
+          sheet.style.transform = "";
+          if (dy > sheet.offsetHeight * 0.25 || (dy > 24 && speed > 0.6)) close(sheet);
+        }
+        head.addEventListener("pointermove", move);
+        head.addEventListener("pointerup", up);
+        head.addEventListener("pointercancel", up);
       });
 
       sheet.querySelector(".sheet__close").addEventListener("click", function () { close(sheet); });
@@ -3603,11 +3795,15 @@
       dotY = topEdge + progress * track();
       dot.style.transform = "translate3d(0, " + dotY.toFixed(1) + "px, 0)";
       placeUp();
-      if (!finePointer) {
-        dot.classList.remove("is-idle");
-        clearTimeout(idleTimer);
-        idleTimer = setTimeout(function () { dot.classList.add("is-idle"); }, 1000);
-      }
+      if (!finePointer) wake();
+    }
+
+    /* touch screens: the dot shows while the page moves or the dot is held, and fades a second after */
+    function wake() {
+      dot.classList.remove("is-idle");
+      clearTimeout(idleTimer);
+      if (dot.classList.contains("is-dragging")) return;
+      idleTimer = setTimeout(function () { dot.classList.add("is-idle"); }, 1000);
     }
 
     function scrollToProgress(clientY) {
@@ -3617,19 +3813,23 @@
       else window.scrollTo(0, y);
     }
 
+    /* the dot can be dragged with a mouse or a finger */
     dot.addEventListener("pointerdown", function (e) {
-      if (!finePointer) return;
       e.preventDefault();
       dot.setPointerCapture(e.pointerId);
       dot.classList.add("is-dragging");
       grabOffset = e.clientY - dot.getBoundingClientRect().top;
+      if (!finePointer) wake();
     });
 
     dot.addEventListener("pointermove", function (e) {
       if (dot.classList.contains("is-dragging")) scrollToProgress(e.clientY);
     });
 
-    function release() { dot.classList.remove("is-dragging"); }
+    function release() {
+      dot.classList.remove("is-dragging");
+      if (!finePointer) wake();
+    }
     dot.addEventListener("pointerup", release);
     dot.addEventListener("pointercancel", release);
 
@@ -3970,6 +4170,7 @@
     initPhrases();
     initDust();
     initCloud();
+    initTreeArt();
     initPinSteps();
     initForge();
     initStatBars();

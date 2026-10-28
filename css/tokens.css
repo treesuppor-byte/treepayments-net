@@ -158,7 +158,7 @@
   --parallax-shift: 4;
   --marquee-dur: 40s;
   --marquee-boost: 5;
-  --dot-size: 20px;
+  --dot-size: 22px;
   --dot-right: var(--sp-2);
   --top-size: var(--dot-size);
   --top-hit: 44px;

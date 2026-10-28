@@ -1673,8 +1673,10 @@ body.is-dark .header.is-scrolled .header__nav a.is-active::after {
   .wallet {
     max-width: 300px;
   }
+  /* the line runs from the middle of the first icon to the middle of the last (half the narrower node each side) */
   .flow__track {
-    margin: 0 28px;
+    left: 30px;
+    right: 30px;
   }
   .flow__node {
     width: 60px;
@@ -1686,11 +1688,13 @@ body.is-dark .header.is-scrolled .header__nav a.is-active::after {
 
 /* Scroll dot: the native scrollbar is hidden and this small circle tracks the scroll position */
 
+/* One layer over the back-to-top button: where the button's touch area reaches down over the dot's own box, the dot
+   gets the touch, so the dot can be grabbed while the button's circle and its margin still take a tap */
 .scroll-dot {
   position: fixed;
   top: 0;
   right: var(--dot-right);
-  z-index: 110;
+  z-index: 111;
   width: var(--sp-6);
   height: var(--sp-6);
   display: flex;
@@ -1730,7 +1734,8 @@ body.is-dark .scroll-dot::before {
   background: var(--green-400);
 }
 
-.scroll-dot.is-touch {
+/* On touch screens the dot shows while the page moves and can then be dragged; hidden, it lets touches through */
+.scroll-dot.is-touch.is-idle {
   pointer-events: none;
 }
 
@@ -1986,11 +1991,29 @@ body.is-locked .scroll-dot {
   display: none;
 }
 
-/* Phones and tablets: in from each side by two thirds of the page's own side margin */
+/* Phones and tablets: in from each side by two thirds of the page's own side margin, and no higher than 66% of the
+   screen as it is shown (with the browser's bars), so the top stays within reach of a thumb */
 @media (max-width: 1024px) {
   .sheet {
     width: calc(100% - var(--gutter) * 4 / 3);
+    max-height: 66vh;
+    max-height: 66svh;
   }
+}
+
+/* Focus goes to the sheet itself when it opens, not to its close button */
+.sheet:focus {
+  outline: none;
+}
+
+/* The head with the handle can be dragged down to close the sheet (main.js) */
+.sheet__head {
+  touch-action: none;
+  cursor: grab;
+}
+
+.sheet.is-dragging {
+  transition: none;
 }
 
 /* The same green dot as the page's scroll dot, riding down the right edge of the sheet with its text (main.js);
@@ -2059,9 +2082,6 @@ html.has-sheet {
 }
 
 @media (max-width: 768px) {
-  .sheet {
-    max-height: 88vh;
-  }
   .sheet__head {
     padding: var(--sp-7) var(--sp-5) var(--sp-4);
   }
